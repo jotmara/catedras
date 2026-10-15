@@ -1,0 +1,1790 @@
+/* ================================================================
+   style.css — Sistema de Diseño Institucional Oficial
+   Universidad de San Buenaventura, Seccional Medellín
+   Manual de Marca — Resolución 404 del 14 de mayo de 2024
+   Inspirado y homologado con https://usbmed.edu.co/
+   ================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* --- Colores Corporativos Oficiales USB --- */
+  --usb-naranja:        #EF7D00; /* C:0 M:60 Y:100 K:0 / R:239 G:125 B:0 */
+  --usb-naranja-hover:  #D96E00;
+  --usb-naranja-dark:   #A35604;
+  --usb-naranja-subtle: rgba(239, 125, 0, 0.08);
+  --usb-naranja-light:  #FFF5EB;
+
+  --usb-negro:          #1D1D1B; /* C:0 M:0 Y:0 K:100 / R:29 G:29 B:27 */
+  --usb-negro-soft:     #2A2A28;
+  --usb-negro-nav:      #181816;
+
+  --usb-gris-fondo:     #F8F9FA;
+  --usb-gris-claro:     #F3F4F6;
+  --usb-gris-borde:     #E5E7EB;
+  --usb-text:           #1D1D1B;
+  --usb-text-muted:     #6B7280;
+  --usb-blanco:         #FFFFFF;
+
+  /* Estados semánticos */
+  --color-success:      #16A34A;
+  --color-success-bg:   #DCFCE7;
+  --color-error:        #DC2626;
+  --color-error-bg:     #FEE2E2;
+
+  /* Tipografía Oficial */
+  --font-main: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Times New Roman', Times, serif;
+
+  /* Geometría y Sombras */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-pill: 9999px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card: 0 4px 16px rgba(29, 29, 27, 0.06);
+  --shadow-hover: 0 12px 28px rgba(29, 29, 27, 0.12);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--usb-gris-fondo);
+  color: var(--usb-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ================================================================
+   1. TOPBAR INSTITUCIONAL (Igual a https://usbmed.edu.co/)
+   ================================================================ */
+.topbar-usb {
+  background: var(--usb-naranja);
+  color: #FFFFFF;
+  padding: 0.7rem 2rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.topbar-usb a {
+  color: #FFFFFF;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.topbar-usb a:hover {
+  opacity: 0.85;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 2.25rem;
+}
+
+.topbar-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+.topbar-icon {
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.topbar-badge {
+  background: var(--usb-naranja);
+  color: #FFF;
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ================================================================
+   2. HEADER PRINCIPAL (Blanco y limpio con Logo Oficial)
+   ================================================================ */
+.header-main {
+  background: #FFFFFF;
+  border-bottom: 5px solid var(--usb-naranja);
+  padding: 0.85rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+}
+
+.header-logo-img {
+  height: 54px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.header-unit {
+  border-left: 2px solid var(--usb-gris-borde);
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-unit-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.header-unit-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--usb-naranja);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.header-nav a {
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--usb-negro);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.header-nav a:hover {
+  color: var(--usb-naranja);
+  background: var(--usb-naranja-light);
+}
+
+.header-nav a.active {
+  background: var(--usb-naranja);
+  color: #FFFFFF;
+  box-shadow: 0 3px 12px rgba(239, 125, 0, 0.35);
+}
+
+.user-badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.65rem;
+  background: var(--usb-gris-claro);
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--usb-negro);
+  border: 1px solid var(--usb-gris-borde);
+  max-width: 320px;
+  flex-shrink: 0;
+}
+
+.user-badge-email {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.btn-logout {
+  background: #FFF;
+  border: 1px solid var(--usb-gris-borde);
+  border-radius: var(--radius-pill);
+  color: var(--usb-negro);
+  font-weight: 800;
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 0.2rem 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-logout:hover {
+  background: var(--color-error);
+  color: #FFFFFF;
+  border-color: var(--color-error);
+}
+
+/* ================================================================
+   3. CONTENEDOR PRINCIPAL
+   ================================================================ */
+main {
+  flex: 1;
+  padding: 2rem;
+}
+
+.container-usb {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ================================================================
+   4. HERO BANNER INSTITUCIONAL
+   ================================================================ */
+.hero-portal {
+  background: linear-gradient(135deg, #1D1D1B 0%, #2D2D2B 100%);
+  border-radius: var(--radius-md);
+  padding: 3.5rem 3rem;
+  color: #FFFFFF;
+  margin-bottom: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-hover);
+  border-top: 5px solid var(--usb-naranja);
+}
+
+.hero-portal::after {
+  content: "USB";
+  position: absolute;
+  right: -20px;
+  bottom: -35px;
+  font-size: 13rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+  user-select: none;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 125, 0, 0.15);
+  border: 1px solid var(--usb-naranja);
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.25rem;
+}
+
+.hero-tag::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: var(--usb-naranja);
+  border-radius: 50%;
+}
+
+.hero-portal h1 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  color: #FFFFFF;
+}
+
+.hero-portal h1 span {
+  color: var(--usb-naranja);
+}
+
+.hero-portal p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 680px;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ================================================================
+   5. BOTONES PROFESIONALES (Sin emojis, tipografía sólida)
+   ================================================================ */
+.btn-usb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.6rem;
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.02em;
+}
+
+.btn-usb-primary {
+  background: var(--usb-naranja);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(239, 125, 0, 0.4);
+}
+
+.btn-usb-primary:hover {
+  background: var(--usb-naranja-hover);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 125, 0, 0.5);
+}
+
+.btn-usb-outline {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #FFFFFF;
+}
+
+.btn-usb-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+.btn-usb-dark {
+  background: var(--usb-negro);
+  color: #FFFFFF;
+}
+
+.btn-usb-dark:hover {
+  background: #333330;
+  color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+.btn-usb-ghost {
+  background: #FFFFFF;
+  color: var(--usb-negro);
+  border-color: var(--usb-gris-borde);
+}
+
+.btn-usb-ghost:hover {
+  border-color: var(--usb-naranja);
+  color: var(--usb-naranja);
+  background: var(--usb-naranja-light);
+}
+
+.btn-usb-sm {
+  padding: 0.45rem 1rem;
+  font-size: 0.8rem;
+}
+
+/* ================================================================
+   6. GRID DE ACCESO Y SERVICIOS PÚBLICOS
+   ================================================================ */
+.services-section-title {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.services-section-title h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+}
+
+.services-section-title h2 span {
+  color: var(--usb-naranja);
+}
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.portal-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--usb-gris-borde);
+  border-top: 4px solid var(--usb-naranja);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-card);
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.portal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--usb-naranja);
+}
+
+.portal-card-category {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--usb-naranja);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+.portal-card h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+  margin-bottom: 0.6rem;
+  line-height: 1.3;
+}
+
+.portal-card p {
+  font-size: 0.88rem;
+  color: var(--usb-text-muted);
+  line-height: 1.55;
+  margin-bottom: 1.5rem;
+}
+
+/* ================================================================
+   7. TARJETAS DE PANELES, TABLAS Y MODALES
+   ================================================================ */
+.card-panel {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--usb-gris-borde);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.card-panel-header {
+  padding: 1.25rem 1.75rem;
+  background: #FFFFFF;
+  border-bottom: 2px solid var(--usb-gris-claro);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.card-panel-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+}
+
+.card-panel-body {
+  padding: 1.75rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: var(--usb-negro);
+}
+
+.page-title span {
+  color: var(--usb-naranja);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-box {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--usb-gris-borde);
+  border-top: 4px solid var(--usb-naranja);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.kpi-box-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--usb-text-muted);
+}
+
+.kpi-box-num {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--usb-negro);
+  line-height: 1.1;
+  margin-top: 0.4rem;
+}
+
+/* Tablas con acabado corporativo */
+.table-wrap {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--usb-gris-borde);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+thead {
+  background: var(--usb-negro);
+}
+
+thead th {
+  padding: 0.9rem 1.2rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #FFFFFF;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--usb-gris-borde);
+  transition: background 0.15s ease;
+}
+
+tbody tr:last-child {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: var(--usb-naranja-subtle);
+}
+
+tbody td {
+  padding: 0.85rem 1.2rem;
+  color: var(--usb-text);
+  vertical-align: middle;
+}
+
+.td-code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--usb-gris-claro);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-xs);
+  color: var(--usb-naranja-dark);
+  display: inline-block;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-orange {
+  background: var(--usb-naranja-light);
+  color: var(--usb-naranja);
+  border: 1px solid #FDBA74;
+}
+
+.badge-dark {
+  background: var(--usb-negro);
+  color: #FFFFFF;
+}
+
+.badge-gray {
+  background: var(--usb-gris-claro);
+  color: var(--usb-text-muted);
+}
+
+/* Formularios */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--usb-negro);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-label span {
+  color: var(--color-error);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  border: 1.5px solid var(--usb-gris-borde);
+  border-radius: var(--radius-sm);
+  background-color: #FFFFFF;
+  color: var(--usb-text);
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+select.form-input {
+  cursor: pointer;
+  background-color: #FFFFFF;
+  line-height: 1.5;
+  height: 48px;
+}
+
+select.form-input option {
+  padding: 0.5rem;
+  font-size: 0.88rem;
+  color: #1D1D1B;
+  background: #FFFFFF;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--usb-naranja);
+  box-shadow: 0 0 0 3px rgba(239, 125, 0, 0.15);
+}
+
+.form-hint {
+  font-size: 0.78rem;
+  color: var(--usb-text-muted);
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Modales */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(29, 29, 27, 0.65);
+  backdrop-filter: blur(3px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-hover);
+  border-top: 4px solid var(--usb-naranja);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--usb-gris-borde);
+}
+
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--usb-text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--color-error);
+}
+
+.modal-body {
+  padding: 1.5rem 1.75rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.75rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* ================================================================
+   8. FOOTER INSTITUCIONAL OFICIAL (Conformidad con manual y web)
+   ================================================================ */
+.footer-usb {
+  background: var(--usb-negro);
+  color: #FFFFFF;
+  border-top: 4px solid var(--usb-naranja);
+  padding: 3rem 2rem 1.5rem;
+  margin-top: auto;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 2.5rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-col h4 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--usb-naranja);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.footer-col p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.footer-bottom {
+  padding-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.footer-badge-vigilada {
+  border: 1px solid rgba(239, 125, 0, 0.6);
+  background: rgba(239, 125, 0, 0.12);
+  color: var(--usb-naranja);
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Toast */
+.toast-area {
+  position: fixed;
+  top: 90px;
+  right: 1.5rem;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 380px;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-hover);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.toast.success {
+  background: var(--color-success-bg);
+  color: #14532D;
+  border-left: 4px solid var(--color-success);
+}
+
+.toast.error {
+  background: var(--color-error-bg);
+  color: #7F1D1D;
+  border-left: 4px solid var(--color-error);
+}
+
+/* ================================================================
+   9. COMPONENTES DE BITÁCORA Y AUDITORÍA AVANZADA
+   ================================================================ */
+.audit-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  background: #FFFFFF;
+  padding: 1.1rem 1.5rem;
+  border: 1px solid var(--usb-gris-borde);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.audit-search-wrap {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex: 1;
+  min-width: 260px;
+}
+
+.audit-chips-wrap {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.audit-chip {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--usb-gris-borde);
+  background: #FFFFFF;
+  color: var(--usb-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.audit-chip:hover {
+  border-color: var(--usb-naranja);
+  color: var(--usb-naranja);
+}
+
+.audit-chip.active {
+  background: var(--usb-naranja);
+  border-color: var(--usb-naranja);
+  color: #FFFFFF;
+}
+
+.audit-badge-op {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.28rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.audit-badge-insert {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+
+.audit-badge-update {
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+}
+
+.audit-badge-delete {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FECACA;
+}
+
+.audit-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 380px;
+}
+
+.audit-preview-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.audit-tag {
+  background: var(--usb-gris-claro);
+  border: 1px solid var(--usb-gris-borde);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.audit-tag strong {
+  color: var(--usb-negro);
+}
+
+.btn-inspect {
+  padding: 0.32rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  background: #FFFFFF;
+  border: 1.5px solid var(--usb-naranja);
+  color: var(--usb-naranja);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.btn-inspect:hover {
+  background: var(--usb-naranja);
+  color: #FFFFFF;
+}
+
+/* Modal de Inspección de Auditoría */
+.json-viewer {
+  background: #0F172A;
+  color: #38BDF8;
+  padding: 1.25rem;
+  border-radius: var(--radius-sm);
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  max-height: 380px;
+  border: 1px solid #1E293B;
+}
+
+.audit-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+  background: var(--usb-gris-fondo);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--usb-gris-borde);
+}
+
+.audit-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.audit-detail-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--usb-text-muted);
+}
+
+.audit-detail-val {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--usb-negro);
+}
+
+/* Pestañas de Navegación de Bitácora / Auditoría */
+.view-tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--usb-gris-borde);
+  margin-bottom: 1.5rem;
+}
+
+.view-tab-btn {
+  padding: 0.75rem 1.4rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--usb-text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  margin-bottom: -2px;
+}
+
+.view-tab-btn:hover {
+  color: var(--usb-naranja);
+}
+
+.view-tab-btn.active {
+  color: var(--usb-naranja);
+  border-bottom-color: var(--usb-naranja);
+}
+
+.view-tab-btn .tab-counter {
+  background: var(--usb-gris-claro);
+  color: var(--usb-negro);
+  font-size: 0.72rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+}
+
+.view-tab-btn.active .tab-counter {
+  background: var(--usb-naranja);
+  color: #FFFFFF;
+}
+
+/* Grilla de Cátedras con Asistencia */
+.catedras-asistencia-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.catedra-card-asist {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--usb-gris-borde);
+  padding: 1.35rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.catedra-card-asist:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--usb-naranja);
+}
+
+.catedra-card-asist::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--usb-naranja);
+}
+
+.cat-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.cat-title-asist {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+  line-height: 1.35;
+  margin-bottom: 0.4rem;
+}
+
+.cat-asist-badge-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.cat-card-meta {
+  font-size: 0.8rem;
+  color: var(--usb-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.cat-card-footer {
+  border-top: 1px solid var(--usb-gris-borde);
+  padding-top: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .topbar-usb { display: none; }
+  .header-main { padding: 0.8rem 1rem; flex-wrap: wrap; gap: 0.75rem; }
+  .header-unit { display: none; }
+  .footer-top { grid-template-columns: 1fr; gap: 1.5rem; }
+  main { padding: 1.25rem 1rem; }
+  .hero-portal { padding: 2rem 1.5rem; }
+  .hero-portal h1 { font-size: 1.8rem; }
+  .audit-toolbar { flex-direction: column; align-items: stretch; }
+  .audit-detail-grid { grid-template-columns: 1fr; }
+}
+
+/* ================================================================
+   10. ESTILOS DEL MÓDULO DE AUTOGESTIÓN DE PONENTES Y CALENDARIO
+   ================================================================ */
+.convocatoria-banner {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+  border: 2px solid #FDBA74;
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.convocatoria-info h3 {
+  color: var(--usb-negro);
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.convocatoria-info p {
+  color: #9A3412;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.convocatoria-countdown {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.countdown-box {
+  background: #FFFFFF;
+  border: 1px solid #FDBA74;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.8rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.countdown-num {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--usb-naranja);
+  line-height: 1;
+}
+
+.countdown-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--usb-text-muted);
+  text-transform: uppercase;
+}
+
+/* Pestañas de Vista Calendario / Registros */
+.view-tabs-nav {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--usb-gris-borde);
+  padding-bottom: 0;
+}
+
+.view-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 0.85rem 1.25rem;
+  font-family: var(--font-main);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--usb-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: -2px;
+}
+
+.view-tab-btn:hover {
+  color: var(--usb-negro);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.view-tab-btn.active {
+  color: var(--usb-naranja);
+  border-bottom-color: var(--usb-naranja);
+  font-weight: 800;
+}
+
+.view-tab-btn .tab-counter {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--usb-gris-claro);
+  color: var(--usb-negro);
+  border: 1px solid var(--usb-gris-borde);
+}
+
+.view-tab-btn.active .tab-counter {
+  background: var(--usb-naranja);
+  color: #FFFFFF;
+  border-color: var(--usb-naranja);
+}
+
+.calendar-month-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--usb-blanco);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--usb-gris-borde);
+  margin-bottom: 1.25rem;
+}
+
+.calendar-month-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.month-btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.month-btn {
+  background: var(--usb-gris-claro);
+  border: 1px solid var(--usb-gris-borde);
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--usb-negro);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.month-btn:hover {
+  background: #E2E8F0;
+}
+
+.month-btn.active {
+  background: var(--usb-naranja);
+  color: #FFFFFF;
+  border-color: var(--usb-naranja);
+  box-shadow: 0 2px 6px rgba(239, 125, 0, 0.35);
+}
+
+.calendar-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .calendar-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+.calendar-grid-container {
+  background: #FFFFFF;
+  border: 1px solid var(--usb-gris-borde);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.calendar-weekdays-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--usb-negro);
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.75rem 0;
+  text-transform: uppercase;
+}
+
+.calendar-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(115px, auto);
+  border-top: 1px solid var(--usb-gris-borde);
+  background: #E2E8F0;
+  gap: 1px;
+}
+
+.cal-day-cell {
+  background: #FFFFFF;
+  padding: 0.5rem;
+  min-height: 115px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.cal-day-cell:hover {
+  background: #F8FAFC;
+}
+
+.cal-day-cell.empty-day {
+  background: #F1F5F9;
+  cursor: default;
+}
+
+.cal-day-cell.active-selected {
+  background: #FFF7ED;
+  box-shadow: inset 0 0 0 2px var(--usb-naranja);
+}
+
+.cal-day-cell.has-slots {
+  background: #FCFDFE;
+}
+
+.cal-day-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.cal-day-num {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.cal-day-cell.has-slots .cal-day-num {
+  background: var(--usb-negro);
+  color: #FFFFFF;
+}
+
+.cal-slots-count-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.cal-slots-count-badge.free {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.cal-slots-count-badge.full {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+
+.cal-slot-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex-grow: 1;
+}
+
+.cal-chip {
+  padding: 0.22rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.cal-chip:hover {
+  transform: translateX(2px);
+}
+
+.cal-chip.available {
+  background: #ECFDF5;
+  color: #047857;
+  border-color: #A7F3D0;
+}
+
+.cal-chip.available:hover {
+  background: #D1FAE5;
+  border-color: #10B981;
+}
+
+.cal-chip.occupied {
+  background: #FEF2F2;
+  color: #991B1B;
+  border-color: #FECACA;
+  opacity: 0.9;
+}
+
+.cal-chip-time {
+  font-weight: 800;
+}
+
+/* Panel Lateral de Detalle del Día Seleccionado */
+.day-details-panel {
+  background: #FFFFFF;
+  border: 1px solid var(--usb-gris-borde);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 1.5rem;
+}
+
+.day-details-header {
+  border-bottom: 2px solid var(--usb-naranja);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.day-details-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+  margin: 0;
+}
+
+.day-details-sub {
+  font-size: 0.78rem;
+  color: var(--usb-text-muted);
+  margin-top: 0.2rem;
+}
+
+.day-slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.day-slot-item {
+  border: 1.5px solid var(--usb-gris-borde);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  background: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.day-slot-item.disponible {
+  border-left: 4px solid #16A34A;
+}
+
+.day-slot-item.bloqueada {
+  border-left: 4px solid #DC2626;
+  background: #FEF2F2;
+}
+
+.day-slot-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.day-slot-time {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-disponible {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+}
+
+.badge-bloqueada {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FECACA;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+}
+
+.day-slot-catedra {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--usb-negro);
+  line-height: 1.3;
+  margin-bottom: 0.35rem;
+}
+
+.day-slot-loc {
+  font-size: 0.74rem;
+  color: var(--usb-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 0.75rem;
+}
+
+/* Modal Formulario Estilo Limpio */
+.autocomplete-search-box {
+  position: relative;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  border: 1.5px solid var(--usb-gris-borde);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: var(--shadow-hover);
+  display: none;
+}
+
+.autocomplete-item {
+  padding: 0.6rem 0.9rem;
+  font-size: 0.84rem;
+  cursor: pointer;
+  border-bottom: 1px solid #F1F5F9;
+  transition: background 0.15s;
+}
+
+.autocomplete-item:hover {
+  background: var(--usb-naranja-light);
+  color: var(--usb-naranja-dark);
+}
+
+/* ================================================================
+   11. MOTOR DE HOMOLOGACIÓN Y PAZ Y SALVO ESTUDIANTIL
+   ================================================================ */
+.homologacion-hero {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+  border: 2px solid #FDBA74;
+  border-radius: var(--radius-md);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.homologacion-search-bar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+  background: #FFFFFF;
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--usb-gris-borde);
+  box-shadow: var(--shadow-sm);
+}
+
+.homologacion-search-input {
+  flex: 1;
+  min-width: 260px;
+}
+
+.status-paz-salvo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.status-paz-salvo.aprobado {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1.5px solid #86EFAC;
+}
+
+.status-paz-salvo.al-dia {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1.5px solid #93C5FD;
+}
+
+.status-paz-salvo.pendiente {
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1.5px solid #FCD34D;
+}
+
+.status-paz-salvo.critico {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border: 1.5px solid #FCA5A5;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 10px;
+  background: #E2E8F0;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin: 0.6rem 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--usb-naranja) 0%, #16A34A 100%);
+  border-radius: 9999px;
+  transition: width 0.4s ease;
+}
+
+.student-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.student-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--usb-gris-borde);
+  border-top: 4px solid var(--usb-naranja);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.student-card.cumplido {
+  border-top-color: #16A34A;
+}
+
+.student-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.student-card-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--usb-negro);
+  margin-bottom: 0.2rem;
+}
+
+.student-card-meta {
+  font-size: 0.8rem;
+  color: var(--usb-text-muted);
+  line-height: 1.45;
+}
+
+

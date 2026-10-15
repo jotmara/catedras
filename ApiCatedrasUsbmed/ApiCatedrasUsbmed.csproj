@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ApiCatedrasUsbmed</RootNamespace>
+    <UserSecretsId>4b03130a-42b9-49ad-80ee-54f6b5b61d3f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.13" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+    <!-- Swagger lo provee Swashbuckle; NO se usa Microsoft.AspNetCore.OpenApi:
+         arrastra Microsoft.OpenApi 2.0.0 (GHSA-v5pm-xwqc-g5wc) y choca con Swashbuckle. -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+    <!-- QR de los enlaces de registro (MIT, sin dependencias nativas). -->
+    <PackageReference Include="QRCoder" Version="1.6.0" />
+    <!-- Archivo plano del ASIS (MIT; EPPlus exige licencia comercial desde la 5). -->
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+  </ItemGroup>
+
+</Project>
