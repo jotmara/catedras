@@ -40,7 +40,30 @@
 - [x] Repositorios Dapper con consultas parametrizadas.
 - [x] Middleware global para captura de errores SQLSTATE (23503, 23505).
 
-### Fase 4: Frontend Web Institucional (Flask)
-- [x] Pantalla Maestro-Detalle interactiva en un solo plano visual.
-- [x] Formularios con desplegables poblados desde la base de datos (cero digitación manual de FKs).
-- [x] Estilo corporativo oficial USBMed (Manual de Marca institucional).
+### Fase 4: Frontend Web Institucional (Flask) — Certificado por Valentina
+- [x] **Pantalla Maestro-Detalle interactiva en un solo plano visual:**
+  - Vista integrada en `/catedras` donde el panel superior lista las cátedras (Maestro) y al seleccionar cualquier registro se actualiza inmediatamente el panel inferior de sesiones asociadas (Detalle).
+  - Interactividad reactiva sin recarga de página mediante dataset JavaScript (`SESIONES_MAP`) y soporte de enlace directo parametrizado (`?catedra_id=X`).
+- [x] **Formularios con desplegables dinámicos para Claves Foráneas (cero digitación de IDs):**
+  - Selector dinámico `<select id="fk_tipo_evento">` poblado desde catálogo `catedras.tipo_evento`.
+  - Selector dinámico `<select id="fk_dependencia">` poblado desde catálogo `catedras.dependencia`.
+  - Selector dinámico `<select id="modal_fk_sede">` poblado desde catálogo `catedras.sede`.
+  - Selector dinámico `<select id="modal_fk_modalidad">` poblado desde catálogo `catedras.modalidad`.
+  - Selector dinámico `<select id="modal_fk_periodo">` poblado desde catálogo `catedras.periodo_academico`.
+  - Selector dinámico `<select id="modal_fk_catedra">` precargado y sincronizado automáticamente con la cátedra seleccionada.
+- [x] **Estilo corporativo oficial USBMed (Manual de Marca institucional):**
+  - Paleta institucional: Naranja corporativo `#EF7D00` / `#FF6600`, negro suave `#1D1D1B`, gris fondo `#F8F9FA`.
+  - Tipografía oficial: Familia Google Font `Montserrat` en pesos 400 a 900.
+  - Logosímbolo oficial USBMed Seccional Medellín, topbar institucional y diseño responsive en `static/style.css`.
+
+---
+
+## 3. Certificación de Responsabilidad por Integrante
+
+| Integrante | Rol Oficial | Rama de Trabajo | Componentes Certificados | Estado de Aprobación |
+| :--- | :--- | :--- | :--- | :---: |
+| **Johan** | Líder de Arquitectura y Base de Datos | `johan` | DDL, Triggers (`trg_sesion_consecutivo`), SPs (`sp_validar_clave_y_registrar`), Spec Kit v2 | **APROBADO** |
+| **Kevin** | Ingeniero Backend API | `kevin` | Controladores REST C# (.NET), Dapper parametrizado, captura SQLSTATE 23503/23505 | **APROBADO** |
+| **Valentina** | Ingeniera Frontend y Experiencia de Usuario | `valentina` | Servidor Flask (`app.py`), Pantalla Única Maestro-Detalle, Selectores FKs, Estilos USBMed (`static/`) | **CERTIFICADO** |
+| **Andrés** | Ingeniero de QA y Documentación | `andres` | Guía de Interpretabilidad, Prompts v2 de IA, Protocolo Smoke Test de disparadores | **APROBADO** |
+
