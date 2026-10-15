@@ -1,0 +1,53 @@
+# --- Temporales de ofimática ---
+~$*
+*.tmp
+
+# --- Sistema ---
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# --- Python / notebooks ---
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# --- Entornos y credenciales ---
+.env
+.env.*
+*.pgpass
+venv/
+.venv/
+
+# --- Salidas generadas ---
+/exportes/
+/salida/
+*.dump
+*.bak
+
+# --- Datos personales reales ---
+# Los volcados con cédulas, nombres y correos NO se versionan por defecto.
+# Ver README, apartado «Protección de datos».
+/datos-reales/
+
+# --- CSV generados por preparar-datos.py ---
+# Se derivan de los Excel del ASIS y duplicarian los datos personales.
+SOLUCION/fisico_postgres/datos/
+
+# --- Compilados de la API (.NET) ---
+ApiCatedrasUsbmed/bin/
+ApiCatedrasUsbmed/obj/
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+.vscode/
+*.log
+
+# --- Frontend Node / Vite ---
+frontend/node_modules/
+frontend/dist/
+*.local
+
