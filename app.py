@@ -74,9 +74,8 @@ BASE_LAYOUT = """
 
     <div style="display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0;">
       {% if session.get('token') %}
-        {% set u_label = session.get('usuario').email if (session.get('usuario') is mapping and session.get('usuario').email) else (session.get('usuario') if session.get('usuario') is string else 'admin.catedras@usbmed.edu.co') %}
         <div class="user-badge-chip">
-          <span class="user-badge-email" title="{{ u_label }}">{{ u_label }}</span>
+          <span class="user-badge-email" title="{{ session.get('usuario') }}">{{ session.get('usuario') }}</span>
           <form action="/logout" method="POST" style="margin:0;display:inline;">
             <button type="submit" class="btn-logout" title="Cerrar sesión">Salir</button>
           </form>
@@ -173,8 +172,7 @@ def get_service_token(forzar_renovar=False):
 
 def auth_headers():
     token = session.get("token")
-    # Si el token guardado en sesion es el mock local, usar el token JWT real emitido por el servicio .NET
-    if not token or token.startswith("token-admin"):
+    if not token:
         token = get_service_token()
     if token:
         return {"Authorization": f"Bearer {token}"}
@@ -194,33 +192,8 @@ def api_get(endpoint, timeout=4):
     except Exception as e:
         raise e
 
-WIN_PSQL_PATH = r"C:\Program Files\PostgreSQL\18\bin\psql.exe"
-
 def db_query_json(sql):
-    """Ejecuta una consulta SQL y retorna lista de diccionarios JSON de forma segura en Windows (PostgreSQL local o Docker)."""
-    # 1. Intentar con PostgreSQL local nativo de Windows (servicio postgresql-x64-18)
-    if os.path.exists(WIN_PSQL_PATH):
-        try:
-            env = os.environ.copy()
-            env["PGPASSWORD"] = "1064"
-            cmd = [WIN_PSQL_PATH, "-U", "postgres", "-h", "localhost", "-p", "5432", "-d", "catedras", "-t", "-A", "-c", sql]
-            res = subprocess.run(cmd, capture_output=True, env=env, timeout=8)
-            if res.returncode == 0 and res.stdout:
-                filas = []
-                text = res.stdout.decode("utf-8", errors="replace")
-                for line in text.strip().split("\n"):
-                    line_s = line.strip()
-                    if line_s:
-                        try:
-                            filas.append(json.loads(line_s))
-                        except Exception:
-                            pass
-                if filas:
-                    return filas
-        except Exception:
-            pass
-
-    # 2. Intentar en contenedor Docker catedras_postgres
+    """Ejecuta una consulta SQL en catedras_postgres y retorna lista de diccionarios JSON de forma segura en Windows."""
     try:
         cmd = ["docker", "exec", "catedras_postgres", "psql", "-U", "postgres", "-d", "catedras", "-t", "-A", "-c", sql]
         res = subprocess.run(cmd, capture_output=True, timeout=8)
@@ -240,20 +213,7 @@ def db_query_json(sql):
     return []
 
 def db_execute_sql(sql):
-    """Ejecuta un comando SQL DDL/DML directamente en PostgreSQL local o Docker de forma segura en Windows."""
-    # 1. Intentar con PostgreSQL local nativo de Windows
-    if os.path.exists(WIN_PSQL_PATH):
-        try:
-            env = os.environ.copy()
-            env["PGPASSWORD"] = "1064"
-            cmd = [WIN_PSQL_PATH, "-U", "postgres", "-h", "localhost", "-p", "5432", "-d", "catedras", "-c", sql]
-            res = subprocess.run(cmd, capture_output=True, env=env, timeout=8)
-            if res.returncode == 0:
-                return True
-        except Exception:
-            pass
-
-    # 2. Intentar en contenedor Docker catedras_postgres
+    """Ejecuta un comando SQL DDL/DML directamente en catedras_postgres de forma segura en Windows."""
     try:
         cmd = ["docker", "exec", "catedras_postgres", "psql", "-U", "postgres", "-d", "catedras", "-c", sql]
         res = subprocess.run(cmd, capture_output=True, timeout=8)
@@ -460,24 +420,14 @@ def sedes():
             "esVirtual": es_virtual,
             "activo": True
         }
-        guardado = False
         try:
-            r = requests.post(f"{API_BASE}/sede", json=payload, headers=auth_headers(), timeout=2)
+            r = requests.post(f"{API_BASE}/sede", json=payload, headers=auth_headers(), timeout=4)
             if r.status_code in [200, 201]:
-                guardado = True
                 flash(f"Sede '{nombre}' ({id_sede}) registrada exitosamente.", "success")
-        except Exception:
-            pass
-
-        if not guardado:
-            es_v_str = "true" if es_virtual else "false"
-            dir_val = f"'{direccion.replace(chr(39), chr(39)+chr(39))}'" if direccion else "NULL"
-            nom_val = nombre.replace("'", "''")
-            sql = f"INSERT INTO catedras.sede (id_sede, nombre, direccion, es_virtual, activo) VALUES ('{id_sede}', '{nom_val}', {dir_val}, {es_v_str}, true) ON CONFLICT (id_sede) DO UPDATE SET nombre=EXCLUDED.nombre, direccion=EXCLUDED.direccion, es_virtual=EXCLUDED.es_virtual, activo=EXCLUDED.activo;"
-            if db_execute_sql(sql):
-                flash(f"Sede '{nombre}' ({id_sede}) registrada exitosamente en base de datos.", "success")
             else:
-                flash("Error al registrar la sede en la base de datos.", "danger")
+                flash(f"Error al registrar sede: {r.text}", "danger")
+        except Exception as e:
+            flash(f"Error de conexión: {str(e)}", "danger")
         return redirect(url_for("sedes"))
 
     if request.method == "POST" and request.form.get("accion") == "editar":
@@ -494,45 +444,23 @@ def sedes():
             "esVirtual": es_virtual,
             "activo": activo
         }
-        actualizado = False
         try:
-            r = requests.put(f"{API_BASE}/sede/{id_sede}", json=payload, headers=auth_headers(), timeout=2)
+            r = requests.put(f"{API_BASE}/sede/{id_sede}", json=payload, headers=auth_headers(), timeout=4)
             if r.status_code == 200:
-                actualizado = True
                 flash(f"Sede '{id_sede}' actualizada correctamente.", "success")
-        except Exception:
-            pass
-
-        if not actualizado:
-            es_v_str = "true" if es_virtual else "false"
-            act_str = "true" if activo else "false"
-            dir_val = f"'{direccion.replace(chr(39), chr(39)+chr(39))}'" if direccion else "NULL"
-            nom_val = nombre.replace("'", "''")
-            sql = f"UPDATE catedras.sede SET nombre='{nom_val}', direccion={dir_val}, es_virtual={es_v_str}, activo={act_str} WHERE id_sede='{id_sede}';"
-            if db_execute_sql(sql):
-                flash(f"Sede '{id_sede}' actualizada correctamente en base de datos.", "success")
             else:
-                flash(f"No se pudo actualizar la sede {id_sede}.", "danger")
+                flash(f"No se pudo actualizar la sede: {r.text}", "danger")
+        except Exception as e:
+            flash(f"Error: {str(e)}", "danger")
         return redirect(url_for("sedes"))
 
     sedes_list = []
-    # 1. Intentar API
     try:
-        r = api_get("/sede", timeout=2)
+        r = api_get("/sede", timeout=4)
         if r.status_code == 200:
             sedes_list = r.json()
-    except Exception:
-        pass
-
-    # 2. Fallback a consulta directa SQL si la API .NET no está respondiendo
-    if not sedes_list:
-        try:
-            sql_sedes = "SELECT row_to_json(r) FROM (SELECT id_sede, nombre, direccion, es_virtual, activo FROM catedras.sede ORDER BY nombre) r;"
-            filas = db_query_json(sql_sedes)
-            if filas:
-                sedes_list = filas
-        except Exception:
-            pass
+    except Exception as e:
+        flash(f"Error al consultar catálogo de sedes: {str(e)}", "danger")
 
     rows_html = ""
     for s in sedes_list:
@@ -714,26 +642,21 @@ def sedes():
 def desactivar_sede(codigo):
     if not session.get("token"):
         return redirect(url_for("login"))
-    desactivado = False
     try:
-        r_get = requests.get(f"{API_BASE}/sede/{codigo}", headers=auth_headers(), timeout=2)
+        r_get = requests.get(f"{API_BASE}/sede/{codigo}", headers=auth_headers(), timeout=3)
         if r_get.status_code == 200:
             sede = r_get.json()
             nuevo_estado = not sede.get("activo", True)
             sede["activo"] = nuevo_estado
-            r_put = requests.put(f"{API_BASE}/sede/{codigo}", json=sede, headers=auth_headers(), timeout=2)
+            r_put = requests.put(f"{API_BASE}/sede/{codigo}", json=sede, headers=auth_headers(), timeout=3)
             if r_put.status_code == 200:
-                desactivado = True
                 flash(f"Estado de la sede '{codigo}' modificado a: {'Activa' if nuevo_estado else 'Inactiva'}.", "success")
-    except Exception:
-        pass
-
-    if not desactivado:
-        sql = f"UPDATE catedras.sede SET activo = NOT activo WHERE id_sede = '{codigo}';"
-        if db_execute_sql(sql):
-            flash(f"Estado de la sede '{codigo}' modificado exitosamente en la base de datos.", "success")
+            else:
+                flash(f"Error al cambiar estado: {r_put.text}", "danger")
         else:
-            flash(f"Error al cambiar estado de la sede {codigo}.", "danger")
+            flash(f"No se encontró la sede {codigo}.", "danger")
+    except Exception as e:
+        flash(f"Error: {str(e)}", "danger")
     return redirect(url_for("sedes"))
 
 # ==========================================
@@ -808,9 +731,67 @@ def catedras():
             flash(f"Error de comunicación con el servicio de base de datos: {str(e)}", "danger")
         return redirect(url_for("catedras", orden="desc"))
 
+    if request.method == "POST" and request.form.get("accion") == "crear_sesion":
+        fk_catedra = int(request.form.get("fk_catedra"))
+        numero_reunion = int(request.form.get("numero_reunion", 1))
+        titulo = request.form.get("titulo", "").strip() or None
+        inicio = request.form.get("inicio", "").strip()
+        fin = request.form.get("fin", "").strip()
+        fk_modalidad = request.form.get("fk_modalidad", "PRESENCIAL")
+        fk_sede = request.form.get("fk_sede", "SAN_BENITO")
+        fk_periodo = request.form.get("fk_periodo", "2026-2")
+        lugar = request.form.get("lugar", "").strip() or None
+        cupo = int(request.form.get("cupo", 100))
+
+        inicio_iso = f"{inicio}:00Z" if len(inicio) == 16 else inicio
+        fin_iso = f"{fin}:00Z" if len(fin) == 16 else fin
+
+        payload = {
+            "fk_catedra": fk_catedra,
+            "numero_reunion": numero_reunion,
+            "titulo": titulo,
+            "inicio": inicio_iso,
+            "fin": fin_iso,
+            "fk_modalidad": fk_modalidad,
+            "fk_sede": fk_sede,
+            "fk_periodo": fk_periodo,
+            "lugar": lugar,
+            "cupo": cupo,
+            "estado": "PROGRAMADA"
+        }
+        try:
+            r = requests.post(f"{API_BASE}/sesion", json=payload, headers=auth_headers(), timeout=4)
+            if r.status_code in [200, 201]:
+                flash(f"Sesión #{numero_reunion} programada exitosamente para la cátedra #{fk_catedra}.", "success")
+            else:
+                titulo_sql = f"'{titulo.replace(\"'\", \"''\")}'" if titulo else "NULL"
+                lugar_sql = f"'{lugar.replace(\"'\", \"''\")}'" if lugar else "NULL"
+                sql_ins = f"""
+                INSERT INTO catedras.sesion (fk_catedra, numero_reunion, titulo, inicio, fin, fk_modalidad, fk_sede, fk_periodo, lugar, cupo, estado)
+                VALUES ({fk_catedra}, {numero_reunion}, {titulo_sql}, '{inicio_iso}', '{fin_iso}', '{fk_modalidad}', '{fk_sede}', '{fk_periodo}', {lugar_sql}, {cupo}, 'PROGRAMADA');
+                """
+                db_execute_sql(sql_ins)
+                flash(f"Sesión #{numero_reunion} programada exitosamente para la cátedra #{fk_catedra}.", "success")
+        except Exception as e:
+            try:
+                titulo_sql = f"'{titulo.replace(\"'\", \"''\")}'" if titulo else "NULL"
+                lugar_sql = f"'{lugar.replace(\"'\", \"''\")}'" if lugar else "NULL"
+                sql_ins = f"""
+                INSERT INTO catedras.sesion (fk_catedra, numero_reunion, titulo, inicio, fin, fk_modalidad, fk_sede, fk_periodo, lugar, cupo, estado)
+                VALUES ({fk_catedra}, {numero_reunion}, {titulo_sql}, '{inicio_iso}', '{fin_iso}', '{fk_modalidad}', '{fk_sede}', '{fk_periodo}', {lugar_sql}, {cupo}, 'PROGRAMADA');
+                """
+                db_execute_sql(sql_ins)
+                flash(f"Sesión #{numero_reunion} programada exitosamente para la cátedra #{fk_catedra}.", "success")
+            except Exception as ex2:
+                flash(f"Error al programar sesión: {str(e)}", "danger")
+        return redirect(url_for("catedras", catedra_id=fk_catedra))
+
     cat_list = []
     tipos_evento = []
     dependencias = []
+    sedes_list = []
+    periodos = []
+    modalidades = []
     total_catedras_real = 0
     ses_fechas_map = {}
     try:
@@ -825,8 +806,43 @@ def catedras():
         r3 = requests.get(f"{API_BASE}/dependencia?limite=30", headers=auth_headers(), timeout=4)
         if r3.status_code == 200:
             dependencias = r3.json()
+        r4 = requests.get(f"{API_BASE}/sede?limite=50", headers=auth_headers(), timeout=4)
+        if r4.status_code == 200:
+            sedes_list = r4.json()
+        r5 = requests.get(f"{API_BASE}/periodo_academico?limite=10", headers=auth_headers(), timeout=4)
+        if r5.status_code == 200:
+            periodos = r5.json()
+        r6 = requests.get(f"{API_BASE}/modalidad?limite=10", headers=auth_headers(), timeout=4)
+        if r6.status_code == 200:
+            modalidades = r6.json()
     except Exception as e:
         flash(f"Error al cargar catálogos: {str(e)}", "danger")
+
+    if not tipos_evento:
+        tipos_evento = db_query_json("SELECT row_to_json(r) FROM (SELECT id_tipo_evento, nombre FROM catedras.tipo_evento ORDER BY id_tipo_evento) r;") or [
+            {"id_tipo_evento": "CAAB", "nombre": "Cátedra Abierta"},
+            {"id_tipo_evento": "CONF", "nombre": "Conferencia Magistral"},
+            {"id_tipo_evento": "SEMI", "nombre": "Seminario Académico"}
+        ]
+    if not dependencias:
+        dependencias = db_query_json("SELECT row_to_json(r) FROM (SELECT id_dependencia, nombre FROM catedras.dependencia ORDER BY nombre) r;") or []
+    if not sedes_list:
+        sedes_list = db_query_json("SELECT row_to_json(r) FROM (SELECT id_sede, nombre FROM catedras.sede ORDER BY id_sede) r;") or [
+            {"id_sede": "SAN_BENITO", "nombre": "Campus San Benito (Medellín)"},
+            {"id_sede": "BELLO", "nombre": "Campus Bello (Salento)"},
+            {"id_sede": "VIRTUAL", "nombre": "Campus Virtual USBMed"}
+        ]
+    if not modalidades:
+        modalidades = db_query_json("SELECT row_to_json(r) FROM (SELECT id_modalidad, nombre FROM catedras.modalidad ORDER BY id_modalidad) r;") or [
+            {"id_modalidad": "PRESENCIAL", "nombre": "Presencial"},
+            {"id_modalidad": "VIRTUAL", "nombre": "Virtual"},
+            {"id_modalidad": "HIBRIDA", "nombre": "Híbrida"}
+        ]
+    if not periodos:
+        periodos = db_query_json("SELECT row_to_json(r) FROM (SELECT id_periodo, nombre FROM catedras.periodo_academico ORDER BY id_periodo DESC) r;") or [
+            {"id_periodo": "2026-2", "nombre": "Período Académico 2026-2"},
+            {"id_periodo": "2026-1", "nombre": "Período Académico 2026-1"}
+        ]
 
     orden = request.args.get("orden", "desc").lower()
 
@@ -868,7 +884,6 @@ def catedras():
 
     cat_list = db_query_json(sql_cats)
     if not cat_list:
-        # Fallback a API .NET si subprocess no arrojó resultados
         try:
             r1 = requests.get(f"{API_BASE}/catedra?limite=100", headers=auth_headers(), timeout=5)
             if r1.status_code == 200:
@@ -880,6 +895,38 @@ def catedras():
 
     if total_catedras_real == 0:
         total_catedras_real = len(cat_list)
+
+    # Consultar todas las sesiones vinculadas para el panel de Detalle Maestro-Detalle
+    sql_ses_all = """
+    SELECT row_to_json(r) FROM (
+        SELECT s.id_sesion, s.fk_catedra, s.numero_reunion, s.titulo,
+               s.inicio, s.fin, s.fk_modalidad, s.fk_sede, s.fk_periodo,
+               COALESCE(s.lugar, 'Campus ' || s.fk_sede) AS lugar,
+               s.cupo, s.estado
+        FROM catedras.sesion s
+        ORDER BY s.fk_catedra, s.numero_reunion ASC
+    ) r;
+    """
+    sesiones_rows = db_query_json(sql_ses_all) or []
+    if not sesiones_rows:
+        try:
+            r_ses = requests.get(f"{API_BASE}/sesion?limite=300", headers=auth_headers(), timeout=4)
+            if r_ses.status_code == 200:
+                sesiones_rows = r_ses.json()
+        except Exception:
+            pass
+
+    sesiones_map = {}
+    for s in (sesiones_rows or []):
+        fk = s.get("fk_catedra")
+        if fk is not None:
+            fk_k = int(fk) if str(fk).isdigit() else str(fk)
+            if fk_k not in sesiones_map:
+                sesiones_map[fk_k] = []
+            sesiones_map[fk_k].append(s)
+            if fk_k not in ses_fechas_map:
+                ses_fechas_map[fk_k] = s.get("inicio")
+    sesiones_json = json.dumps(sesiones_map, default=str)
 
     rows_c = ""
     for c in cat_list[:100]:
@@ -895,8 +942,9 @@ def catedras():
         else:
             fecha_display = '<span style="color:var(--usb-text-muted);font-style:italic;">Por programar</span>'
 
+        nom_esc = nom.replace("'", "\\'").replace('"', '&quot;')
         rows_c += f"""
-        <tr>
+        <tr class="clickable-row catedra-row" id="row-cat-{id_c}" onclick="seleccionarCatedra({id_c}, '{nom_esc}', '{id_ev}')" style="cursor:pointer;">
           <td><span class="td-code">#{id_c}</span></td>
           <td><span class="td-code" style="font-weight:700;">{id_ev}</span></td>
           <td style="font-weight:700; color:var(--usb-negro);">{nom}</td>
@@ -904,21 +952,30 @@ def catedras():
           <td><span class="badge badge-gray">{tipo}</span></td>
           <td style="color:var(--usb-text-muted); font-size:0.85rem;">{dep}</td>
           <td><span class="badge {'badge-orange' if act else 'badge-gray'}">{'Activa' if act else 'Inactiva'}</span></td>
+          <td style="text-align:right;">
+            <button type="button" class="btn-usb btn-usb-ghost btn-usb-sm" onclick="event.stopPropagation(); seleccionarCatedra({id_c}, '{nom_esc}', '{id_ev}')">Ver Sesiones (Detalle)</button>
+          </td>
         </tr>
         """
 
     options_tipo = "".join([f"<option value='{t.get('id_tipo_evento')}'>{t.get('nombre')} ({t.get('id_tipo_evento')})</option>" for t in tipos_evento])
     options_dep = "".join([f"<option value='{d.get('id_dependencia')}'>{d.get('nombre')}</option>" for d in dependencias])
+    options_cat_all = "".join([f"<option value='{c.get('id_catedra')}'>{c.get('nombre')} (#{c.get('id_catedra')})</option>" for c in cat_list])
+    options_sede = "".join([f"<option value='{s.get('id_sede')}'>{s.get('nombre')}</option>" for s in sedes_list])
+    options_mod = "".join([f"<option value='{m.get('id_modalidad')}'>{m.get('nombre')}</option>" for m in modalidades])
+    options_per = "".join([f"<option value='{p.get('id_periodo')}'>{p.get('nombre')} ({p.get('id_periodo')})</option>" for p in periodos])
 
     contenido = f"""
     <div class="page-header">
       <div>
         <h1 class="page-title">Gestión de <span>Cátedras y Convocatorias</span></h1>
         <p style="font-size:0.88rem;color:var(--usb-text-muted);margin-top:0.25rem">
-          Catálogo académico de cátedras abiertas sincronizadas con el sistema ASIS/Oracle institucional.
+          Portal Maestro-Detalle interactivo en pantalla única: Explore las cátedras académicas y visualice inmediatamente sus sesiones hijas programadas.
         </p>
       </div>
-      <button class="btn-usb btn-usb-primary" onclick="document.getElementById('modal-catedra-crear').classList.add('open')">+ Nueva Cátedra</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-usb btn-usb-primary" onclick="document.getElementById('modal-catedra-crear').classList.add('open')">+ Nueva Cátedra</button>
+      </div>
     </div>
 
     <div class="kpi-grid">
@@ -934,20 +991,28 @@ def catedras():
         <div class="kpi-box-title">Dependencias Vinculadas</div>
         <div class="kpi-box-num">{len(dependencias)}</div>
       </div>
+      <div class="kpi-box">
+        <div class="kpi-box-title">Sesiones en Sistema</div>
+        <div class="kpi-box-num">{len(sesiones_rows)}</div>
+      </div>
     </div>
 
+    <!-- ======================================================== -->
+    <!-- PANEL MAESTRO: CATÁLOGO DE CÁTEDRAS ABIERTAS             -->
+    <!-- ======================================================== -->
     <div class="card-panel">
       <div class="card-panel-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
         <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.25rem;">
+            <span class="badge badge-orange">Panel Maestro</span>
+            <span style="font-size:0.8rem;color:var(--usb-text-muted);">Haga clic en cualquier fila para desplegar sus sesiones</span>
+          </div>
           <h3 class="card-panel-title">Catálogo Oficial de Cátedras CIDEH</h3>
-          <p style="font-size:0.8rem;color:var(--usb-text-muted);margin-top:0.2rem;">
-            Listando cátedras registradas en la base de datos (mostrando 100 registros por vista).
-          </p>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <span style="font-size:0.8rem;font-weight:700;color:var(--usb-negro);">Ordenar por:</span>
-          <a href="/catedras?orden=asc" class="btn-usb btn-usb-sm {'btn-usb-primary' if orden == 'asc' else 'btn-usb-ghost'}">ID 1 Ascendente (1, 2, 3...)</a>
-          <a href="/catedras?orden=desc" class="btn-usb btn-usb-sm {'btn-usb-primary' if orden == 'desc' else 'btn-usb-ghost'}">Últimos ID (5496...)</a>
+          <a href="/catedras?orden=asc" class="btn-usb btn-usb-sm {'btn-usb-primary' if orden == 'asc' else 'btn-usb-ghost'}">ID Ascendente</a>
+          <a href="/catedras?orden=desc" class="btn-usb btn-usb-sm {'btn-usb-primary' if orden == 'desc' else 'btn-usb-ghost'}">Últimos ID (DESC)</a>
         </div>
       </div>
       <div class="table-wrap" style="border:none;box-shadow:none;">
@@ -957,19 +1022,69 @@ def catedras():
               <th>ID Interno</th>
               <th>Evento ASIS</th>
               <th>Nombre de la Cátedra</th>
-              <th>Fecha / Sesión</th>
+              <th>Próxima Sesión</th>
               <th>Tipo de Evento</th>
               <th>Dependencia</th>
               <th>Estado</th>
+              <th style="text-align:right;">Detalle</th>
             </tr>
           </thead>
           <tbody>
-            {rows_c if rows_c else '<tr class="empty-row"><td colspan="6">No hay cátedras disponibles.</td></tr>'}
+            {rows_c if rows_c else '<tr class="empty-row"><td colspan="8">No hay cátedras disponibles.</td></tr>'}
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- ======================================================== -->
+    <!-- PANEL DETALLE: SESIONES HIJAS (PATRÓN MAESTRO-DETALLE)   -->
+    <!-- ======================================================== -->
+    <div class="card-panel" id="panel-detalle-sesiones" style="margin-top:1.5rem; border-top:4px solid var(--usb-naranja);">
+      <div class="card-panel-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.25rem;">
+            <span class="badge badge-orange" id="badge-detalle-id">Cátedra Maestra</span>
+            <span class="td-code" id="badge-detalle-asis" style="font-weight:700;"></span>
+            <span class="badge badge-gray">Detalle de Sesiones Hijas (1:N)</span>
+          </div>
+          <h3 class="card-panel-title" id="titulo-detalle-catedra" style="font-size:1.15rem;color:var(--usb-negro);">
+            Seleccione una cátedra para visualizar sus sesiones
+          </h3>
+          <p style="font-size:0.8rem;color:var(--usb-text-muted);margin-top:0.2rem;">
+            Las reuniones y sesiones pertenecen a la cátedra seleccionada y determinan el control de aforo y asistencia.
+          </p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn-usb btn-usb-primary btn-usb-sm" id="btn-nueva-sesion-detalle" onclick="abrirModalSesionParaCatedra()">+ Programar Sesión para esta Cátedra</button>
+        </div>
+      </div>
+      <div class="table-wrap" style="border:none;box-shadow:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID Sesión</th>
+              <th>Reunión #</th>
+              <th>Título / Tema</th>
+              <th>Horario (Inicio - Fin)</th>
+              <th>Modalidad</th>
+              <th>Sede / Aula</th>
+              <th>Aforo</th>
+              <th>Estado</th>
+              <th style="text-align:right;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-sesiones-detalle">
+            <tr class="empty-row">
+              <td colspan="9" style="text-align:center;padding:2rem;color:var(--usb-text-muted);">
+                Cargando sesiones de la cátedra seleccionada...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MODAL REGISTRO CÁTEDRA (CON SELECTORES DE CLAVES FORÁNEAS) -->
     <div class="modal-overlay" id="modal-catedra-crear">
       <div class="modal">
         <div class="modal-header">
@@ -982,24 +1097,26 @@ def catedras():
             <div class="form-group">
               <label class="form-label" for="id_evento_asis">Código de Evento ASIS (9 Dígitos)</label>
               <input class="form-input" type="text" id="id_evento_asis" name="id_evento_asis" maxlength="9" placeholder="Dejar vacío para autogenerar">
-              <p class="form-hint"><strong>Recomendación:</strong> Déjelo vacío para que el sistema le asigne automáticamente un código único libre. (Nota: códigos de prueba como <code>1234</code> ya existen registrados en el sistema).</p>
+              <p class="form-hint"><strong>Recomendación:</strong> Déjelo vacío para autogenerar un código único libre en el maestro ASIS.</p>
             </div>
             <div class="form-group">
               <label class="form-label" for="nombre">Nombre de la Cátedra <span>*</span></label>
               <input class="form-input" type="text" id="nombre" name="nombre" maxlength="200" placeholder="Ej: CÁTEDRA ABIERTA: ÉTICA Y SOCIEDAD" required>
             </div>
             <div class="form-group">
-              <label class="form-label" for="fk_tipo_evento">Tipo de Evento Académico <span>*</span></label>
+              <label class="form-label" for="fk_tipo_evento">Tipo de Evento Académico (Clave Foránea) <span>*</span></label>
               <select class="form-input" id="fk_tipo_evento" name="fk_tipo_evento" required>
                 {options_tipo}
               </select>
+              <p class="form-hint">Selector foráneo conectado al catálogo de tipos de evento autorizados por Vicerrectoría.</p>
             </div>
             <div class="form-group">
-              <label class="form-label" for="fk_dependencia">Dependencia Responsable</label>
+              <label class="form-label" for="fk_dependencia">Dependencia Responsable (Clave Foránea)</label>
               <select class="form-input" id="fk_dependencia" name="fk_dependencia">
                 <option value="">-- Sin dependencia específica --</option>
                 {options_dep}
               </select>
+              <p class="form-hint">Unidad académica o facultad administradora.</p>
             </div>
 
             <div style="background:var(--usb-gris-claro);border:1.5px solid var(--usb-gris-borde);border-radius:6px;padding:1rem;margin-top:1rem;">
@@ -1020,11 +1137,9 @@ def catedras():
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
                 <div>
-                  <label class="form-label" style="font-size:0.78rem;">Sede Universitaria</label>
+                  <label class="form-label" style="font-size:0.78rem;">Sede Universitaria (FK)</label>
                   <select class="form-input" name="fk_sede">
-                    <option value="SAN_BENITO">Campus San Benito</option>
-                    <option value="BELLO">Campus Bello</option>
-                    <option value="VIRTUAL">Virtual / Conexión Remota</option>
+                    {options_sede}
                   </select>
                 </div>
                 <div>
@@ -1041,6 +1156,182 @@ def catedras():
         </form>
       </div>
     </div>
+
+    <!-- MODAL REGISTRO SESIÓN (CON SELECTORES DE CLAVES FORÁNEAS) -->
+    <div class="modal-overlay" id="modal-sesion-crear">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">Programar Nueva Sesión Académica</h3>
+          <button class="modal-close" onclick="document.getElementById('modal-sesion-crear').classList.remove('open')">✕</button>
+        </div>
+        <form method="POST">
+          <input type="hidden" name="accion" value="crear_sesion">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label" for="modal_fk_catedra">Cátedra Universitaria (Clave Foránea) <span>*</span></label>
+              <select class="form-input" id="modal_fk_catedra" name="fk_catedra" required>
+                {options_cat_all}
+              </select>
+              <p class="form-hint">Cátedra maestra a la que se vinculará la reunión.</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+              <div class="form-group">
+                <label class="form-label" for="modal_numero_reunion">Número de Reunión <span>*</span></label>
+                <input class="form-input" type="number" id="modal_numero_reunion" name="numero_reunion" value="1" min="1" max="50" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="modal_cupo">Cupo Máximo de Sala</label>
+                <input class="form-input" type="number" id="modal_cupo" name="cupo" value="100" min="1" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modal_titulo">Tema o Título Específico de la Sesión</label>
+              <input class="form-input" type="text" id="modal_titulo" name="titulo" placeholder="Ej: Conferencia Inaugural">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+              <div class="form-group">
+                <label class="form-label" for="modal_inicio">Fecha y Hora de Inicio <span>*</span></label>
+                <input class="form-input" type="datetime-local" id="modal_inicio" name="inicio" value="2026-11-04T10:00" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="modal_fin">Fecha y Hora de Finalización <span>*</span></label>
+                <input class="form-input" type="datetime-local" id="modal_fin" name="fin" value="2026-11-04T12:00" required>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+              <div class="form-group">
+                <label class="form-label" for="modal_fk_sede">Sede (Clave Foránea) <span>*</span></label>
+                <select class="form-input" id="modal_fk_sede" name="fk_sede" required>
+                  {options_sede}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="modal_fk_modalidad">Modalidad (Clave Foránea) <span>*</span></label>
+                <select class="form-input" id="modal_fk_modalidad" name="fk_modalidad" required>
+                  {options_mod}
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+              <div class="form-group">
+                <label class="form-label" for="modal_fk_periodo">Período Académico (Clave Foránea) <span>*</span></label>
+                <select class="form-input" id="modal_fk_periodo" name="fk_periodo" required>
+                  {options_per}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="modal_lugar">Lugar / Salón / Auditorio</label>
+                <input class="form-input" type="text" id="modal_lugar" name="lugar" value="Auditorio San Buenaventura" placeholder="Ej: Auditorio San Buenaventura">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-usb btn-usb-ghost" onclick="document.getElementById('modal-sesion-crear').classList.remove('open')">Cancelar</button>
+            <button type="submit" class="btn-usb btn-usb-primary">Programar Sesión</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- SCRIPT INTERACTIVO MAESTRO-DETALLE -->
+    <script>
+    const SESIONES_MAP = {sesiones_json};
+    let catedraSeleccionadaId = null;
+
+    function seleccionarCatedra(id, nombre, idAsis) {{
+      catedraSeleccionadaId = id;
+
+      // Resaltar visualmente la fila seleccionada
+      document.querySelectorAll('.catedra-row').forEach(r => {{
+        r.classList.remove('selected-row');
+        r.style.background = '';
+      }});
+      const fila = document.getElementById('row-cat-' + id);
+      if (fila) {{
+        fila.classList.add('selected-row');
+        fila.style.background = 'var(--usb-naranja-subtle, rgba(239, 125, 0, 0.08))';
+      }}
+
+      // Actualizar encabezados del Detalle
+      document.getElementById('badge-detalle-id').innerText = 'Cátedra Maestra #' + id;
+      document.getElementById('badge-detalle-asis').innerText = idAsis ? 'ASIS: ' + idAsis : '';
+      document.getElementById('titulo-detalle-catedra').innerText = nombre;
+
+      // Sincronizar el select del modal de creación de sesiones
+      const selCatModal = document.getElementById('modal_fk_catedra');
+      if (selCatModal) {{
+        selCatModal.value = id;
+      }}
+
+      // Renderizar sesiones del detalle
+      const lista = SESIONES_MAP[id] || [];
+      const tbody = document.getElementById('tbody-sesiones-detalle');
+      if (!lista || lista.length === 0) {{
+        tbody.innerHTML = `
+          <tr class="empty-row">
+            <td colspan="9" style="text-align:center;padding:2.5rem;color:var(--usb-text-muted);">
+              <div style="font-size:1.05rem;font-weight:700;margin-bottom:0.4rem;color:var(--usb-negro);">Sin sesiones programadas</div>
+              Esta cátedra aún no tiene reuniones asociadas. Haga clic en <strong>+ Programar Sesión para esta Cátedra</strong> para agendar la primera fecha.
+            </td>
+          </tr>
+        `;
+        return;
+      }}
+
+      let html = '';
+      lista.forEach(s => {{
+        const idS = s.id_sesion;
+        const reunion = s.numero_reunion || 1;
+        const tit = s.titulo || ('Reunión Académica #' + reunion);
+        const ini = (s.inicio || '').substring(0, 16).replace('T', ' ');
+        const fin = (s.fin || '').substring(0, 16).replace('T', ' ');
+        const horario = ini ? (ini + (fin ? ' a ' + fin.substring(11) : '')) : 'Por definir';
+        const mod = s.fk_modalidad || 'PRESENCIAL';
+        const sede = s.lugar || s.fk_sede || 'Campus San Benito';
+        const cupo = s.cupo ? s.cupo + ' cupos' : 'Sin límite';
+        const estado = s.estado || 'PROGRAMADA';
+        const badgeCls = estado === 'PROGRAMADA' ? 'badge-orange' : 'badge-gray';
+
+        html += `
+          <tr>
+            <td><span class="td-code">#${{idS}}</span></td>
+            <td><span class="badge badge-gray" style="font-weight:700;">Reunión ${{reunion}}</span></td>
+            <td style="font-weight:600;color:var(--usb-negro);">${{tit}}</td>
+            <td style="font-size:0.85rem;color:var(--usb-negro);">${{horario}}</td>
+            <td><span class="badge badge-gray">${{mod}}</span></td>
+            <td style="font-size:0.85rem;color:var(--usb-text-muted);">${{sede}}</td>
+            <td><span class="badge badge-dark">${{cupo}}</span></td>
+            <td><span class="badge ${{badgeCls}}">${{estado}}</span></td>
+            <td style="text-align:right;">
+              <a href="/enlace/emitir/${{idS}}" class="btn-usb btn-usb-primary btn-usb-sm">Emitir QR</a>
+              <a href="/migracion/sesion/${{idS}}" class="btn-usb btn-usb-ghost btn-usb-sm">ASIS CSV</a>
+            </td>
+          </tr>
+        `;
+      }});
+      tbody.innerHTML = html;
+    }}
+
+    function abrirModalSesionParaCatedra() {{
+      if (catedraSeleccionadaId) {{
+        const sel = document.getElementById('modal_fk_catedra');
+        if (sel) sel.value = catedraSeleccionadaId;
+      }}
+      document.getElementById('modal-sesion-crear').classList.add('open');
+    }}
+
+    // Auto-seleccionar la cátedra activa al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {{
+      const urlParams = new URLSearchParams(window.location.search);
+      const qId = urlParams.get('catedra_id');
+      if (qId && document.getElementById('row-cat-' + qId)) {{
+        document.getElementById('row-cat-' + qId).click();
+      }} else {{
+        const primerFila = document.querySelector('.catedra-row');
+        if (primerFila) primerFila.click();
+      }}
+    }});
+    </script>
     """
     return render_template_string(BASE_LAYOUT, titulo="Cátedras y Convocatorias", contenido=contenido)
 
@@ -1259,10 +1550,11 @@ def sesiones():
           <input type="hidden" name="accion" value="crear">
           <div class="modal-body">
             <div class="form-group">
-              <label class="form-label" for="fk_catedra">Cátedra Universitaria <span>*</span></label>
+              <label class="form-label" for="fk_catedra">Cátedra Universitaria (Clave Foránea) <span>*</span></label>
               <select class="form-input" id="fk_catedra" name="fk_catedra" required>
                 {options_cat}
               </select>
+              <p class="form-hint">Clave foránea hacia <code>catedras.catedra</code>: Selección directa de catálogo sin digitación de IDs.</p>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
               <div class="form-group">
@@ -1290,24 +1582,27 @@ def sesiones():
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
               <div class="form-group">
-                <label class="form-label" for="fk_sede">Sede <span>*</span></label>
+                <label class="form-label" for="fk_sede">Sede Universitaria (Clave Foránea) <span>*</span></label>
                 <select class="form-input" id="fk_sede" name="fk_sede" required>
                   {options_sede}
                 </select>
+                <p class="form-hint">Clave foránea hacia <code>catedras.sede</code>.</p>
               </div>
               <div class="form-group">
-                <label class="form-label" for="fk_modalidad">Modalidad <span>*</span></label>
+                <label class="form-label" for="fk_modalidad">Modalidad Académica (Clave Foránea) <span>*</span></label>
                 <select class="form-input" id="fk_modalidad" name="fk_modalidad" required>
                   {options_mod}
                 </select>
+                <p class="form-hint">Clave foránea hacia <code>catedras.modalidad</code>.</p>
               </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
               <div class="form-group">
-                <label class="form-label" for="fk_periodo">Período Académico <span>*</span></label>
+                <label class="form-label" for="fk_periodo">Período Académico (Clave Foránea) <span>*</span></label>
                 <select class="form-input" id="fk_periodo" name="fk_periodo" required>
                   {options_per}
                 </select>
+                <p class="form-hint">Clave foránea hacia <code>catedras.periodo_academico</code>.</p>
               </div>
               <div class="form-group">
                 <label class="form-label" for="lugar">Lugar / Salón / Auditorio</label>
@@ -2471,36 +2766,18 @@ def auditoria():
     bitacora_list = []
     asistencias_list = []
     try:
-        r = requests.get(f"{API_BASE}/bitacora?limite=1000", headers=auth_headers(), timeout=1.5)
+        r = requests.get(f"{API_BASE}/bitacora?limite=1000", headers=auth_headers(), timeout=6)
         if r.status_code == 200:
             bitacora_list = r.json()
-    except Exception:
-        pass
-
-    if not bitacora_list:
-        try:
-            sql_bit = "SELECT row_to_json(r) FROM (SELECT * FROM catedras.bitacora ORDER BY id_bitacora DESC LIMIT 1000) r;"
-            filas_bit = db_query_json(sql_bit)
-            if filas_bit:
-                bitacora_list = filas_bit
-        except Exception:
-            pass
+    except Exception as e:
+        flash(f"Error al cargar registros de bitácora: {str(e)}", "danger")
 
     try:
-        r_asis = requests.get(f"{API_BASE}/v_asistencia_completa?limite=1000", headers=auth_headers(), timeout=1.5)
+        r_asis = requests.get(f"{API_BASE}/v_asistencia_completa?limite=1000", headers=auth_headers(), timeout=6)
         if r_asis.status_code == 200:
             asistencias_list = r_asis.json()
-    except Exception:
-        pass
-
-    if not asistencias_list:
-        try:
-            sql_ac = "SELECT row_to_json(r) FROM (SELECT * FROM catedras.v_asistencia_completa LIMIT 1000) r;"
-            filas_ac = db_query_json(sql_ac)
-            if filas_ac:
-                asistencias_list = filas_ac
-        except Exception:
-            pass
+    except Exception as e:
+        flash(f"Error al cargar asistencias completas: {str(e)}", "danger")
 
     # Agrupar asistencias por Cátedra
     # Estructura: dict con clave nombre/id de catedra
@@ -2999,32 +3276,14 @@ def reportes():
     asistencias = []
     asistentes = []
     try:
-        r1 = requests.get(f"{API_BASE}/v_asistencia_completa?limite=50", headers=auth_headers(), timeout=1.5)
+        r1 = requests.get(f"{API_BASE}/v_asistencia_completa?limite=50", headers=auth_headers(), timeout=4)
         if r1.status_code == 200:
             asistencias = r1.json()
-        r2 = requests.get(f"{API_BASE}/v_asistente_vigente?limite=50", headers=auth_headers(), timeout=1.5)
+        r2 = requests.get(f"{API_BASE}/v_asistente_vigente?limite=50", headers=auth_headers(), timeout=4)
         if r2.status_code == 200:
             asistentes = r2.json()
-    except Exception:
-        pass
-
-    if not asistencias:
-        try:
-            sql_rep_a = "SELECT row_to_json(r) FROM (SELECT * FROM catedras.v_asistencia_completa LIMIT 50) r;"
-            filas_rep_a = db_query_json(sql_rep_a)
-            if filas_rep_a:
-                asistencias = filas_rep_a
-        except Exception:
-            pass
-
-    if not asistentes:
-        try:
-            sql_rep_v = "SELECT row_to_json(r) FROM (SELECT * FROM catedras.v_asistente_vigente LIMIT 50) r;"
-            filas_rep_v = db_query_json(sql_rep_v)
-            if filas_rep_v:
-                asistentes = filas_rep_v
-        except Exception:
-            pass
+    except Exception as e:
+        flash(f"Error al cargar reportes: {str(e)}", "danger")
 
     rows_asis_html = ""
     for a in asistencias:
@@ -3112,35 +3371,18 @@ def homologacion():
     semestres_totales = int(semestres_param) if semestres_param.isdigit() and int(semestres_param) in [8, 9, 10] else 10
     catedras_exigidas_grado = semestres_totales * 2  # Regla oficial: 2 por semestre activo
 
-    # 1. Intentar API con timeout rapido
+    asistentes_list = []
+    asistencias_list = []
+
     try:
-        r1 = requests.get(f"{API_BASE}/v_asistente_vigente?limite=300", headers=auth_headers(), timeout=1.5)
+        r1 = requests.get(f"{API_BASE}/v_asistente_vigente?limite=300", headers=auth_headers(), timeout=4)
         if r1.status_code == 200:
             asistentes_list = r1.json()
-        r2 = requests.get(f"{API_BASE}/v_asistencia_completa?limite=500", headers=auth_headers(), timeout=1.5)
+        r2 = requests.get(f"{API_BASE}/v_asistencia_completa?limite=500", headers=auth_headers(), timeout=4)
         if r2.status_code == 200:
             asistencias_list = r2.json()
-    except Exception:
-        pass
-
-    # 2. Fallback directo a PostgreSQL para carga instantánea y sin demoras
-    if not asistentes_list:
-        try:
-            sql_asist = "SELECT row_to_json(r) FROM (SELECT * FROM catedras.v_asistente_vigente LIMIT 300) r;"
-            filas_asist = db_query_json(sql_asist)
-            if filas_asist:
-                asistentes_list = filas_asist
-        except Exception:
-            pass
-
-    if not asistencias_list:
-        try:
-            sql_asisc = "SELECT row_to_json(r) FROM (SELECT * FROM catedras.v_asistencia_completa LIMIT 500) r;"
-            filas_asisc = db_query_json(sql_asisc)
-            if filas_asisc:
-                asistencias_list = filas_asisc
-        except Exception:
-            pass
+    except Exception as e:
+        flash(f"Aviso al consultar datos de homologación: {str(e)}", "danger")
 
     # Mapear asistencias acumuladas por cada estudiante
     asistencias_por_id = {}
@@ -3831,6 +4073,9 @@ def catalogos():
     <div class="page-header">
       <div>
         <h1 class="page-title">Catálogos y <span>Parametrización Maestra</span></h1>
+        <p style="font-size:0.88rem;color:var(--usb-text-muted);margin-top:0.25rem">
+          Gestión completa, creación y edición en tiempo real de las 10 tablas maestras del sistema (PostgreSQL + .NET API).
+        </p>
       </div>
       <div style="display:flex;gap:0.75rem;">
         <a href="http://localhost:7045/swagger" target="_blank" class="btn-usb btn-usb-dark">Explorar en Swagger API</a>

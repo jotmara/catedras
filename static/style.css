@@ -1787,4 +1787,27 @@ select.form-input option {
   line-height: 1.45;
 }
 
+/* ================================================================
+   PATRÓN MAESTRO-DETALLE INTERACTIVO Y SELECTORES FK (UI USBMED)
+   ================================================================ */
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
 
+.clickable-row:hover {
+  background-color: var(--usb-naranja-subtle, rgba(239, 125, 0, 0.08)) !important;
+}
+
+.selected-row {
+  background-color: var(--usb-naranja-light, #FFF5EB) !important;
+  border-left: 4px solid var(--usb-naranja, #EF7D00) !important;
+}
+
+.selected-row td {
+  font-weight: 600;
+}
+
+.selected-row .td-code {
+  color: var(--usb-naranja, #EF7D00);
+}
