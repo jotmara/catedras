@@ -1550,10 +1550,11 @@ def sesiones():
           <input type="hidden" name="accion" value="crear">
           <div class="modal-body">
             <div class="form-group">
-              <label class="form-label" for="fk_catedra">Cátedra Universitaria <span>*</span></label>
+              <label class="form-label" for="fk_catedra">Cátedra Universitaria (Clave Foránea) <span>*</span></label>
               <select class="form-input" id="fk_catedra" name="fk_catedra" required>
                 {options_cat}
               </select>
+              <p class="form-hint">Clave foránea hacia <code>catedras.catedra</code>: Selección directa de catálogo sin digitación de IDs.</p>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
               <div class="form-group">
@@ -1581,24 +1582,27 @@ def sesiones():
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
               <div class="form-group">
-                <label class="form-label" for="fk_sede">Sede <span>*</span></label>
+                <label class="form-label" for="fk_sede">Sede Universitaria (Clave Foránea) <span>*</span></label>
                 <select class="form-input" id="fk_sede" name="fk_sede" required>
                   {options_sede}
                 </select>
+                <p class="form-hint">Clave foránea hacia <code>catedras.sede</code>.</p>
               </div>
               <div class="form-group">
-                <label class="form-label" for="fk_modalidad">Modalidad <span>*</span></label>
+                <label class="form-label" for="fk_modalidad">Modalidad Académica (Clave Foránea) <span>*</span></label>
                 <select class="form-input" id="fk_modalidad" name="fk_modalidad" required>
                   {options_mod}
                 </select>
+                <p class="form-hint">Clave foránea hacia <code>catedras.modalidad</code>.</p>
               </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
               <div class="form-group">
-                <label class="form-label" for="fk_periodo">Período Académico <span>*</span></label>
+                <label class="form-label" for="fk_periodo">Período Académico (Clave Foránea) <span>*</span></label>
                 <select class="form-input" id="fk_periodo" name="fk_periodo" required>
                   {options_per}
                 </select>
+                <p class="form-hint">Clave foránea hacia <code>catedras.periodo_academico</code>.</p>
               </div>
               <div class="form-group">
                 <label class="form-label" for="lugar">Lugar / Salón / Auditorio</label>
